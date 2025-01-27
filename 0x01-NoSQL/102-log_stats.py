@@ -1,7 +1,8 @@
 #!/usr/bin/python3
 """
-Script that provides statistics on the nginx logs stored in MongoDB.
+Script that provides statistics about Nginx logs stored in MongoDB.
 """
+
 from pymongo import MongoClient
 
 def print_nginx_stats():
@@ -22,14 +23,11 @@ def print_nginx_stats():
         "DELETE": collection.count_documents({"method": "DELETE"})
     }
 
-    # Count status codes
-    status_codes = collection.aggregate([
-        {"$group": {"_id": "$status", "count": {"$sum": 1}}},
-        {"$sort": {"_id": 1}}
-    ])
+    # Count the GET requests with path /status
+    status_check = collection.count_documents({"method": "GET", "path": "/status"})
 
-    # Count the top 10 IPs
-    top_ips = collection.aggregate([
+    # Get top 10 most frequent IPs
+    ip_counts = collection.aggregate([
         {"$group": {"_id": "$ip", "count": {"$sum": 1}}},
         {"$sort": {"count": -1}},
         {"$limit": 10}
@@ -43,14 +41,12 @@ def print_nginx_stats():
     for method, count in methods.items():
         print(f"\tmethod {method}: {count}")
 
-    # Print status codes
-    print(f"{total_logs} status check")
-    for status in status_codes:
-        print(f"\tstatus {status['_id']}: {status['count']}")
+    # Print status check (GET method with /status path)
+    print(f"{status_check} status check")
 
     # Print top 10 IPs
     print("IPs:")
-    for ip in top_ips:
+    for ip in ip_counts:
         print(f"\t{ip['_id']}: {ip['count']}")
 
 if __name__ == "__main__":
