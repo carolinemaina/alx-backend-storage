@@ -1,3 +1,2 @@
-// Insert a document in the collection school
-// document must have attribute name with value "ALX"
-db.school.insertOne({ name: "ALX" });
+// script that inserts a document in the collection school
+db.school.insert({name: "ALX"})
