@@ -1,2 +1,8 @@
-// script that lists all documents with name="Holberton school" in the collection school
-db.school.find({ name="ALX" })
+// Get the database name from the command-line arguments
+var dbName = db.getMongo().getDBName();
+
+// Use the database passed as option for `mongo` command
+var collection = db.getSiblingDB(dbName).school;
+
+// Find documents where the name is "ALX"
+collection.find({ name: "ALX" }).forEach(printjson);
