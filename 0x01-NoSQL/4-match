@@ -1,2 +1,2 @@
-// 4-match
-db.school.find({ name: "ALX" }).forEach(printjson);
+// script that lists all documents with name="Holberton school" in the collection school
+db.school.find({ name: "ALX" })
