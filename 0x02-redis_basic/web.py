@@ -6,6 +6,7 @@ from functools import wraps
 # Set up the Redis client
 r = redis.StrictRedis(host='localhost', port=6379, db=0)
 
+
 def cache_page(func):
     """
     A decorator to cache the page content and track access count in Redis.
@@ -25,7 +26,7 @@ def cache_page(func):
             url (str): The URL to fetch and cache.
 
         Returns:
-            str: The content of the page, either from cache or fetched from the URL.
+            str: The content of the page.
         """
         # Check if page content is already cached
         cached_content = r.get(url)
@@ -52,6 +53,7 @@ def cache_page(func):
         return content
 
     return wrapper
+
 
 @cache_page
 def get_page(url: str) -> str:
