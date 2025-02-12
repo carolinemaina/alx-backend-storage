@@ -4,65 +4,35 @@
 import redis
 import requests
 from functools import wraps
+from typing import Callable
 
 
-r = redis.StrictRedis(host='localhost', port=6379, db=0)
+redis_store = redis.Redis()
 '''The module-level Redis instance.
 '''
 
 
-def cache_page(func):
+def data_cacher(method: Callable) -> Callable:
+    '''Caches the output of fetched data.
     '''
-    A decorator to cache the page content and track access count in Redis.
-
-    Args:
-        func (function): The function to wrap and decorate.
-
-    Returns:
-        function: The wrapped function with caching and access tracking.
-    '''
-    @wraps(func)
-    def wrapper(url: str) -> str:
+    @wraps(method)
+    def invoker(url) -> str:
+        '''The wrapper function for caching the output.
         '''
-        A wrapper function to handle caching and access count in Redis.
-
-        Args:
-            url (str): The URL to fetch and cache.
-
-        Returns:
-            str: The content of the page.
-        '''
-        cached_content = r.get(url)
-        if cached_content:
-            count_key = f"count:{url}"
-            r.incr(count_key)
-            return cached_content.decode('utf-8')
-
-        content = func(url)
-
-        r.setex(url, 10, content)
-
-        count_key = f"count:{url}"
-        if not r.exists(count_key):
-            r.set(count_key, 0)
-
-        r.incr(count_key)
-
-        return content
-
-    return wrapper
+        redis_store.incr(f'count:{url}')
+        result = redis_store.get(f'result:{url}')
+        if result:
+            return result.decode('utf-8')
+        result = method(url)
+        redis_store.set(f'count:{url}', 0)
+        redis_store.setex(f'result:{url}', 10, result)
+        return result
+    return invoker
 
 
-@cache_page
+@data_cacher
 def get_page(url: str) -> str:
+    '''Returns the content of a URL after caching the request's response,
+    and tracking the request.
     '''
-    Fetches the HTML content of a URL.
-
-    Args:
-        url (str): The URL to fetch content from.
-
-    Returns:
-        str: The HTML content of the page.
-    '''
-    response = requests.get(url)
-    return response.text
+    return requests.get(url).text
