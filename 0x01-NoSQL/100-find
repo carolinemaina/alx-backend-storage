@@ -1,2 +1,2 @@
-// database name will be passed as option of mongo command
-db.school.find({ name: /^ALX/ }).forEach(printjson);
+// Regex filter
+db.school.find({name: /Holberton.*/}).forEach(printjson);
