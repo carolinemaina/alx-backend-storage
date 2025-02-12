@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import redis
 import requests
-import time
 from functools import wraps
 
 # Set up the Redis client
@@ -30,7 +29,7 @@ def cache_page(func):
         # Initialize access count if not set
         count_key = f"count:{url}"
         if not r.exists(count_key):
-            r.set(count_key, 0)
+            r.set(count_key, 0)  # Initialize the count to 0
         
         # Increment the access count
         r.incr(count_key)
